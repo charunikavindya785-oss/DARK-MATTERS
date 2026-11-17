@@ -1,6 +1,7 @@
 {
   "name": "smartq",
   "version": "1.0.0",
+  "private": true,
   "description": "Intelligent Queue Prediction and Adaptive Service Allocation Engine - BuildX 0.1 Hackathon Challenge 10",
   "main": "backend/server.js",
   "scripts": {
