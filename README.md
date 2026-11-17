@@ -37,40 +37,55 @@ The simulation engine provides dedicated functions for counter allocation and wa
   - `shortest-queue`: Selects the counter with the minimum number of customers currently waiting.
   - `dynamic`: Balances load by selecting the counter that minimizes customer wait time and congestion.
 
-## Installation instructions
+## Installation & Execution Instructions
 1. Ensure Python 3 and Node.js are installed.
 2. Open a terminal in the project folder.
-3. Install any dependencies if needed, or simply use the built-in runtime.
+3. Run the demo locally:
+   ```bash
+   python -m http.server 8000
+   ```
+4. Open your browser at:
+   ```text
+   http://localhost:8000
+   ```
 
-## Execution instructions
-Run the demo locally:
+---
 
-```bash
-python -m http.server 8000
-```
+## Member 02: Student Management Module
 
-Then open this URL:
+### 1. Project Overview
+The Student Management System is a core part of the Smart Q Queue Management System. It is responsible for registering students, validating student information, preventing duplicate registrations, and automatically generating sequential queue numbers.
 
-```text
-http://localhost:8000
-```
+### 2. Responsibilities
+- **2.1 Student Registration**:
+  - Accept Student ID, Name, Contact Number, and Service Type.
+  - Validate all input fields and prevent duplicate active registrations.
+- **2.2 Automatic Queue Token Generation**:
+  - Generate sequential queue numbers based on service type:
+    - General: `GEN-001`, `GEN-002` (or `Q-001`)
+    - Registration: `REG-001`, `REG-002`
+    - Payment: `PAY-001`, `PAY-002`
+    - Exam Inquiry: `EXM-001`, `EXM-002`
 
-To run the simulation tests:
+### 3. Project Files
+| File Name | Description |
+|---|---|
+| `studentManager.js` | Contains the `Student` and `StudentManager` classes. Handles registration, validation, token generation, and localStorage caching. |
+| `student_registration.html` | Provides the student registration interface with registration form, ticket slip display, and dynamic student list table. |
+| `student_manager.py` | Python implementation of the Student Management System with interactive command-line interface. |
 
-```bash
-node --test
-```
+### 4. Integration with Other Team Members
+- **Member 01 (Frontend Developer)**:
+  - Embeds the student registration form and token display card into the homepage.
+- **Member 03 (Queue Management)**:
+  - Uses `studentManager.getWaitingStudents()` to populate the active queue.
+- **Member 04 (Algorithm Developer)**:
+  - Uses `student.registeredAt` timestamp to compute real-time waiting times.
+- **Member 05 (Counter Allocation)**:
+  - Updates student status when called (`studentManager.updateStatus("Q-001", "Serving")`).
+- **Member 06 (Dashboard & Integration)**:
+  - Retrieves active students and logs via `studentManager.getAllStudents()` and `localStorage.getItem("smartq_students")`.
 
-## Dataset and API information
-This project uses simulated customer demand rather than a live external dataset. The arrival process is generated from configurable hourly demand, peak periods, and service-time variance so the application can run without external API dependencies.
-
-## Known limitations
-- The model uses simulated demand rather than real institutional data.
-- It assumes counters can be reallocated instantly without setup delays.
-- The current version focuses on queue prediction and aggregate operational insight rather than deep forecasting or live staff scheduling integration.
-
-## Future improvements
-- Priority-aware service windows for vulnerable or urgent customers.
-- More realistic arrival distributions and peak forecasting models.
-- Dynamic staff reallocation based on live queue telemetry.
-- Exporting results to CSV or PDF reports.
+### 5. Running Member 02 Module
+- **Web UI**: Open [`student_registration.html`](file:///c:/Users/User/Desktop/smart%20Q/student_registration.html) in any web browser.
+- **Python CLI**: Run `python student_manager.py` in the terminal.

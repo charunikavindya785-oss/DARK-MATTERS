@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Q - Student Registration & Queue Generator</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen text-gray-800 bg-cover bg-center bg-no-repeat relative" style="background-image: url('f368f8b082761aa215e0906a14db0df4.jpg');">
+
+    <!-- Dark Overlay so text is readable over the background image -->
+    <div class="absolute inset-0 bg-blue-950/80 min-h-screen z-0"></div>
+
+    <!-- Main Wrapper to keep content above overlay -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+
+        <!-- Header Section -->
+        <header class="bg-blue-900/90 backdrop-blur-md border-b border-blue-800 py-6 text-center shadow-md">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center">
+                <h1 class="text-3xl font-bold text-white mt-2">Smart Q - Student Registration & Queue Generator</h1>
+                <p class="text-blue-200 text-sm mt-1">Enter student details and automatically generate a queue number for the system.</p>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow">
+            
+            <!-- Left Column: Student Registration Form -->
+            <section class="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-blue-800">
+                <div class="flex items-center gap-2 mb-6 border-b pb-4">
+                    <span class="text-xl">📋</span>
+                    <h2 class="text-lg font-bold text-gray-800">Student Registration</h2>
+                </div>
+
+                <form id="registrationForm" onsubmit="generateQueue(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Student ID / Registration Number *</label>
+                        <input type="text" id="studentId" required placeholder="e.g. IT21004567 or ST101" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Student Full Name *</label>
+                        <input type="text" id="fullName" required placeholder="e.g. Kasun Perera" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Contact Number / Email *</label>
+                        <input type="text" id="contact" required placeholder="e.g. 0771234567" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Service Required *</label>
+                        <select id="service" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                            <option value="" disabled selected>-- Select Service --</option>
+                            <option value="Student Inquiry">Student Inquiry</option>
+                            <option value="Document Submission">Document Submission</option>
+                            <option value="Payment / Finance">Payment / Finance</option>
+                            <option value="Technical Support">Technical Support</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200 flex items-center justify-center gap-2 shadow-md">
+                        <span>🎫</span> Register Student & Generate Queue Number
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Column: Generated Queue Ticket -->
+            <section class="bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-blue-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-6 border-b pb-4">
+                        <span class="text-xl">🎫</span>
+                        <h2 class="text-lg font-bold text-gray-800">Generated Queue Ticket</h2>
+                    </div>
+
+                    <!-- Ticket Display Box -->
+                    <div id="ticketContainer" class="flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-center">
+                        <div id="placeholderState">
+                            <p class="text-gray-400 font-medium">No ticket generated yet.</p>
+                            <p class="text-gray-400 text-xs mt-1">Fill the form on the left to issue a student queue number.</p>
+                        </div>
+
+                        <!-- Hidden Ticket Content (Shown after generation) -->
+                        <div id="ticketDetails" class="hidden w-full max-w-sm bg-white border border-blue-200 p-6 rounded-2xl shadow-sm text-left relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-blue-600 text-white text-xs px-3 py-1 rounded-bl-lg font-bold">Smart Q Ticket</div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider">Queue Number</p>
+                            <h3 id="displayQueueNo" class="text-4xl font-extrabold text-blue-600 my-2">Q-101</h3>
+                            
+                            <div class="border-t border-gray-100 my-3 pt-3 space-y-1 text-sm">
+                                <p><strong class="text-gray-600">ID:</strong> <span id="displayId" class="text-gray-800"></span></p>
+                                <p><strong class="text-gray-600">Name:</strong> <span id="displayName" class="text-gray-800"></span></p>
+                                <p><strong class="text-gray-600">Service:</strong> <span id="displayService" class="text-gray-800"></span></p>
+                                <p><strong class="text-gray-600">Time:</strong> <span id="displayTime" class="text-gray-800"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print / Reset Actions -->
+                <div id="ticketActions" class="hidden mt-4">
+                    <button onclick="window.print()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 rounded-lg text-sm transition">
+                        🖨️ Print Ticket
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer Note for Member 03 -->
+        <footer class="max-w-7xl mx-auto px-4 pb-8 w-full">
+            <div class="bg-blue-900/90 backdrop-blur-md border border-blue-800 px-4 py-3 rounded-lg text-sm text-blue-200 flex items-center gap-2">
+              
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- JavaScript with LocalStorage to increment queue number -->
+    <script>
+        // Check if a queue counter already exists in browser storage, otherwise start from 101
+        let queueCounter = localStorage.getItem('smartQ_counter');
+        if (!queueCounter) {
+            queueCounter = 101;
+        } else {
+            queueCounter = parseInt(queueCounter);
+        }
+
+        function generateQueue(event) {
+            event.preventDefault();
+
+            // Get input values
+            const studentId = document.getElementById('studentId').value;
+            const fullName = document.getElementById('fullName').value;
+            const service = document.getElementById('service').value;
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Generate Queue Code
+            const queueNo = `Q-${queueCounter}`;
+
+            // Increment for next registration and save to browser storage
+            queueCounter++;
+            localStorage.setItem('smartQ_counter', queueCounter);
+
+            // Populate Ticket Details
+            document.getElementById('displayQueueNo').innerText = queueNo;
+            document.getElementById('displayId').innerText = studentId;
+            document.getElementById('displayName').innerText = fullName;
+            document.getElementById('displayService').innerText = service;
+            document.getElementById('displayTime').innerText = now;
+
+            // Toggle Visibility
+            document.getElementById('placeholderState').classList.add('hidden');
+            document.getElementById('ticketDetails').classList.remove('hidden');
+            document.getElementById('ticketActions').classList.remove('hidden');
+
+            // Reset the form so a new student can be registered easily
+            document.getElementById('registrationForm').reset();
+        }
+    </script>
+</body>
+</html>
