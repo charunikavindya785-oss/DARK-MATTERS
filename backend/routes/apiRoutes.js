@@ -8,6 +8,7 @@ const QueueingTheory = require('../engine/queueingTheory');
 const CongestionPredictor = require('../engine/congestionPredictor');
 const ResourceOptimizer = require('../engine/resourceOptimizer');
 const db = require('../db/database');
+const studentQueueDb = require('../db/studentQueueDb');
 
 class ApiRoutes {
   static handleRequest(req, res, pathname, query, body) {
@@ -189,6 +190,55 @@ class ApiRoutes {
       const limit = Number(query.limit) || 15;
       sendJson(200, { runs: db.getRecentRuns(limit) });
       return true;
+    }
+
+    // 9. Student Queue (Member 03 - Queue Management CRUD)
+    if (pathname === '/api/student-queue') {
+      if (req.method === 'GET') {
+        const status = query.status || null;
+        const queue = studentQueueDb.getQueue(status);
+        const waitingCount = studentQueueDb.getQueueLength();
+        sendJson(200, { success: true, waitingCount, total: queue.length, queue });
+        return true;
+      }
+
+      if (req.method === 'POST') {
+        try {
+          const { name, serviceTime, arrivalTime } = body || {};
+          if (!name || !name.trim()) {
+            return sendError(400, 'Student name is required');
+          }
+          if (!Number.isFinite(Number(serviceTime)) || Number(serviceTime) <= 0) {
+            return sendError(400, 'Valid positive serviceTime is required');
+          }
+
+          const student = studentQueueDb.addStudent(name, serviceTime, arrivalTime || new Date());
+          sendJson(201, { success: true, message: 'Student added to queue database', student });
+        } catch (err) {
+          sendError(500, err.message);
+        }
+        return true;
+      }
+
+      if (req.method === 'PATCH') {
+        try {
+          const { id, status, counterAssigned } = body || {};
+          if (!id || !status) {
+            return sendError(400, 'Student id and status are required');
+          }
+          const updated = studentQueueDb.updateStudentStatus(id, status, counterAssigned);
+          sendJson(200, { success: true, student: updated });
+        } catch (err) {
+          sendError(500, err.message);
+        }
+        return true;
+      }
+
+      if (req.method === 'DELETE') {
+        studentQueueDb.clearQueue();
+        sendJson(200, { success: true, message: 'Student queue cleared' });
+        return true;
+      }
     }
 
     return false; // Not an API route
