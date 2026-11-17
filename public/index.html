@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartQ - Intelligent Queue Prediction & Service Allocation</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo-area">
+      <div class="logo-icon">Q</div>
+      <div class="logo-text">
+        <h1>SmartQ</h1>
+        <p>Intelligent Queue Prediction & Adaptive Allocation Engine</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="app-nav">
+      <button class="nav-tab active" data-tab="tab-sim">
+        <span>🎮</span> Live Simulation
+      </button>
+      <button class="nav-tab" data-tab="tab-comparison">
+        <span>📊</span> Strategy Benchmarks
+      </button>
+      <button class="nav-tab" data-tab="tab-forecast">
+        <span>🔮</span> Congestion Forecaster
+      </button>
+      <button class="nav-tab" data-tab="tab-theory">
+        <span>📐</span> Queueing Theory (M/M/c)
+      </button>
+      <button class="nav-tab" data-tab="tab-optimizer">
+        <span>💰</span> Staff Optimizer
+      </button>
+    </nav>
+
+    <div class="header-badges">
+      <span class="badge badge-live">SIMULATION ENGINE READY</span>
+      <span class="badge badge-hackathon">BuildX 0.1 - Challenge 10</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Preset Scenario Bar -->
+    <div class="scenario-bar">
+      <div class="scenario-title">
+        <span style="font-size: 1.2rem;">🏛️</span>
+        <div>
+          <strong style="font-size: 0.9rem;">Preset Organizations:</strong>
+          <p id="scenarioDescription" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+            Loading scenario configuration...
+          </p>
+        </div>
+      </div>
+      <div class="scenario-pills">
+        <button class="pill-btn active" data-preset="hospital-triage">🏥 Hospital Triage</button>
+        <button class="pill-btn" data-preset="university-hub">🎓 University Registrar</button>
+        <button class="pill-btn" data-preset="government-licensing">🏛️ Citizen Licensing</button>
+        <button class="pill-btn" data-preset="shock-surge">⚡ Shock Flash Crowd (+300%)</button>
+      </div>
+    </div>
+
+    <!-- Global KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card" style="--card-accent: var(--accent-blue);">
+        <div class="kpi-header">
+          <span class="kpi-title">Avg Waiting Time</span>
+          <span class="kpi-icon">⏱️</span>
+        </div>
+        <div class="kpi-value" id="kpiAvgWait">-- min</div>
+        <div class="kpi-subtext" id="kpiAvgWaitSub">Simulating cohort...</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-rose);">
+        <div class="kpi-header">
+          <span class="kpi-title">Max Waiting Time</span>
+          <span class="kpi-icon">⏳</span>
+        </div>
+        <div class="kpi-value" id="kpiMaxWait">-- min</div>
+        <div class="kpi-subtext" id="kpiMaxWaitSub">Worst-case queue delay</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-amber);">
+        <div class="kpi-header">
+          <span class="kpi-title">Peak Queue Length</span>
+          <span class="kpi-icon">👥</span>
+        </div>
+        <div class="kpi-value" id="kpiPeakQueue">--</div>
+        <div class="kpi-subtext" id="kpiPeakQueueSub">Max backlog observed</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-emerald);">
+        <div class="kpi-header">
+          <span class="kpi-title">SLA Compliance Rate</span>
+          <span class="kpi-icon">🎯</span>
+        </div>
+        <div class="kpi-value" id="kpiSlaPct">--%</div>
+        <div class="kpi-subtext" id="kpiSlaSub">Served within target &lt; 10 mins</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-purple);">
+        <div class="kpi-header">
+          <span class="kpi-title">Customer Satisfaction</span>
+          <span class="kpi-icon">⭐</span>
+        </div>
+        <div class="kpi-value" id="kpiCsat">-- / 5.0</div>
+        <div class="kpi-subtext">Estimated CSAT score</div>
+      </div>
+    </section>
+
+    <!-- TAB 1: Live Interactive Visual Simulation -->
+    <div id="tab-sim" class="tab-view active">
+      <div class="sim-layout">
+        <!-- Sidebar Controls -->
+        <aside>
+          <div class="card">
+            <h3 class="card-title">⚙️ Simulation Setup</h3>
+            <div class="form-group">
+              <label class="form-label" for="simStrategySelect">Resource Allocation Strategy</label>
+              <select id="simStrategySelect" class="form-select">
+                <option value="PREDICTIVE_SURGE" selected>✨ SmartQ AI Predictive Surge (Recommended)</option>
+                <option value="BASELINE">⚠️ Baseline (Static FIFO / No Rebalance)</option>
+                <option value="DYNAMIC_LOAD_BALANCED">🔄 Dynamic Load Balancing & Skill Routing</option>
+                <option value="PRIORITY_AWARE">🚨 Priority-Weighted Starvation-Free</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cfgCustomerCount">Simulated Customers (≥ 100)</label>
+              <input type="number" id="cfgCustomerCount" class="form-input" min="100" max="1000" step="10" value="150">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cfgArrivalPattern">Arrival Distribution Process</label>
+              <select id="cfgArrivalPattern" class="form-select">
+                <option value="SURGE_PEAKS" selected>Surge Peaks (Morning & Afternoon Waves)</option>
+                <option value="POISSON">Poisson Process (M/M/c)</option>
+                <option value="UNIFORM">Uniform Spread</option>
+                <option value="FLASH_CROWD">Flash Crowd Shock (+300% Burst)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cfgArrivalInterval">Mean Arrival Interval (min)</label>
+              <input type="number" id="cfgArrivalInterval" class="form-input" min="0.5" max="10" step="0.1" value="2.5">
+            </div>
+
+            <button id="btnApplyConfig" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+              🔄 Re-run Simulation & Cohort
+            </button>
+          </div>
+
+          <!-- Quick Live Telemetry Card -->
+          <div class="card">
+            <h3 class="card-title">📡 Real-Time Telemetry</h3>
+            <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-secondary);">Current Clock:</span>
+                <strong id="simClockDisplay" style="color: var(--accent-cyan);">0h 00m</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-secondary);">Waiting in Queue:</span>
+                <strong id="kpiCurrentQueue" style="color: var(--accent-amber);">0</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-secondary);">Served So Far:</span>
+                <strong id="kpiLiveServed" style="color: var(--accent-emerald);">0 / 150</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-secondary);">Live Avg Wait:</span>
+                <strong id="kpiLiveAvgWait" style="color: #ffffff;">0.0 min</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-secondary);">Active Counters:</span>
+                <strong id="kpiLiveActiveCounters" style="color: var(--accent-blue);">3 / 5</strong>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Simulation Stage -->
+        <section>
+          <!-- Playback Controls Bar -->
+          <div class="sim-controls-bar">
+            <div class="playback-controls">
+              <button id="btnPlay" class="btn btn-success">▶ Play</button>
+              <button id="btnPause" class="btn btn-secondary">⏸ Pause</button>
+              <button id="btnStep" class="btn btn-secondary">⏭ Step (+1m)</button>
+              <button id="btnReset" class="btn btn-secondary">🔄 Reset</button>
+            </div>
+
+            <div class="sim-speed">
+              <span>Simulation Speed:</span>
+              <input type="range" id="speedSlider" min="1" max="50" value="10" style="width: 120px;">
+              <strong id="speedLabel" style="color: var(--accent-cyan); width: 35px;">10x</strong>
+            </div>
+          </div>
+
+          <!-- Service Counters Stage (Visual Desks) -->
+          <div class="card" style="padding-bottom: 8px;">
+            <div class="card-title">
+              <span>🏢 Service Counters (Dynamic Allocation Stage)</span>
+              <span style="font-size: 0.75rem; color: var(--text-secondary);">3 Base Desks + 2 Intelligent Surge Units</span>
+            </div>
+            <div id="countersStage" class="counters-stage">
+              <!-- Rendered dynamically by visualizer.js -->
+            </div>
+          </div>
+
+          <!-- Customer Queue Lane -->
+          <div class="queue-lane-wrapper">
+            <div class="queue-lane-header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong style="font-size: 0.95rem;">🚶 Real-Time Customer Queue Lane</strong>
+                <span id="queueCountBadge" class="badge badge-live">0 waiting</span>
+              </div>
+              <div style="font-size: 0.75rem; display: flex; gap: 12px;">
+                <span style="color: #fb7185;">■ Emergency Priority</span>
+                <span style="color: #fbbf24;">■ Senior/Priority</span>
+                <span style="color: #60a5fa;">■ Standard</span>
+              </div>
+            </div>
+            <div id="queueStream" class="queue-stream">
+              <!-- Rendered dynamically by visualizer.js -->
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB 2: Strategy Benchmarks & Side-by-Side Comparison -->
+    <div id="tab-comparison" class="tab-view">
+      <div class="card">
+        <div class="card-title">
+          <span>🏆 Side-by-Side Strategy Evaluation (Apples-to-Apples Cohort Comparison)</span>
+          <div class="btn-group">
+            <button id="btnExportCsv" class="btn btn-secondary">📥 Export CSV</button>
+            <button id="btnExportJson" class="btn btn-secondary">📥 Export JSON</button>
+          </div>
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">
+          All strategies are simulated against the <strong>exact same customer cohort, arrival timestamps, and service complexities</strong> using a deterministic PRNG seed.
+        </p>
+
+        <!-- Benchmark Comparison Table -->
+        <div class="comparison-table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Strategy Name</th>
+                <th>Avg Wait Time</th>
+                <th>Max Wait Time</th>
+                <th>Peak Queue</th>
+                <th>Counter Util.</th>
+                <th>SLA Compliance (&lt;10m)</th>
+                <th>CSAT Score</th>
+                <th>Counter-Hours</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTableBody">
+              <!-- Populated dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div class="card">
+          <h3 class="card-title">📊 Waiting Time Metrics Across Strategies (min)</h3>
+          <div class="chart-container">
+            <canvas id="chartWaitComparison"></canvas>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+            Comparison of Average Wait Time vs Max Wait Time across all 4 resource allocation models.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">📈 Queue Backlog Over Time (Baseline vs SmartQ Surge)</h3>
+          <div class="chart-container">
+            <canvas id="chartQueueTimeline"></canvas>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+            Observe how SmartQ AI actively dampens queue spikes compared to the unmanaged baseline explosion.
+          </p>
+        </div>
+      </div>
+
+      <!-- Gauges Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div class="card" style="text-align: center;">
+          <h3 class="card-title">⚙️ SmartQ Counter Utilization Rate</h3>
+          <div style="height: 160px;">
+            <canvas id="gaugeUtilization"></canvas>
+          </div>
+        </div>
+        <div class="card" style="text-align: center;">
+          <h3 class="card-title">🎯 SLA Compliance Target (&lt; 10 min)</h3>
+          <div style="height: 160px;">
+            <canvas id="gaugeSla"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Congestion Forecaster & Peak Windows -->
+    <div id="tab-forecast" class="tab-view">
+      <div class="card">
+        <h3 class="card-title">🔮 Predictive Congestion Forecaster & Peak Window Detection</h3>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">
+          Uses dynamic queue-velocity propagation ($\frac{d\lambda}{dt}$, current backlog, and aggregate counter throughput) to predict congestion levels and peak windows before they occur.
+        </p>
+
+        <div id="forecastRiskBadge" class="alert-box alert-warning">
+          Calculating congestion risk...
+        </div>
+
+        <!-- Heatmap Timeline -->
+        <div style="margin: 20px 0;">
+          <strong style="font-size: 0.85rem;">Congestion Heatmap Timeline Across Operating Hours:</strong>
+          <div style="height: 80px; margin-top: 8px;">
+            <canvas id="chartHeatmap"></canvas>
+          </div>
+        </div>
+
+        <!-- Detected Peak Windows -->
+        <div style="margin-top: 24px;">
+          <strong style="font-size: 0.9rem;">⚠️ Detected Peak Congestion Windows:</strong>
+          <div id="peakWindowsList" style="margin-top: 12px;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Queueing Theory Analytical Calculator (M/M/c) -->
+    <div id="tab-theory" class="tab-view">
+      <div style="display: grid; grid-template-columns: 340px 1fr; gap: 24px;">
+        <div class="card">
+          <h3 class="card-title">📐 Theoretical Parameters</h3>
+          <div class="form-group">
+            <label class="form-label" for="theoryLambda">Arrival Rate λ (arrivals/min)</label>
+            <input type="number" id="theoryLambda" class="form-input" min="0.1" max="5.0" step="0.05" value="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="theoryMu">Service Rate per Counter μ (services/min)</label>
+            <input type="number" id="theoryMu" class="form-input" min="0.05" max="2.0" step="0.05" value="0.25">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="theoryC">Active Service Counters c</label>
+            <input type="number" id="theoryC" class="form-input" min="1" max="15" step="1" value="3">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="theoryCs2">Service Time Variance (Cs²)</label>
+            <input type="number" id="theoryCs2" class="form-input" min="0.1" max="4.0" step="0.1" value="1.0">
+            <span style="font-size: 0.7rem; color: var(--text-muted);">1.0 = Exponential (M/M/c), &gt; 1 = High Variance (M/G/c)</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="theoryTarget">Target Max Wait Time (min)</label>
+            <input type="number" id="theoryTarget" class="form-input" min="1" max="30" step="1" value="5.0">
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">📊 Erlang-C & Little's Law Theoretical Metrics</h3>
+          <div id="theoryStabilityAlert" class="alert-box alert-success" style="display: none;"></div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 16px 0;">
+            <div style="background: rgba(11, 15, 25, 0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">TRAFFIC INTENSITY (ρ)</div>
+              <div id="outRho" style="font-size: 1.4rem; font-weight: 700; color: #60a5fa; margin-top: 4px;">--</div>
+            </div>
+            <div style="background: rgba(11, 15, 25, 0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">EXPECTED WAIT (Wq)</div>
+              <div id="outWq" style="font-size: 1.4rem; font-weight: 700; color: #34d399; margin-top: 4px;">--</div>
+            </div>
+            <div style="background: rgba(11, 15, 25, 0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">EXPECTED QUEUE (Lq)</div>
+              <div id="outLq" style="font-size: 1.4rem; font-weight: 700; color: #fbbf24; margin-top: 4px;">--</div>
+            </div>
+            <div style="background: rgba(11, 15, 25, 0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">PROBABILITY TO WAIT (Pq)</div>
+              <div id="outPq" style="font-size: 1.4rem; font-weight: 700; color: #c084fc; margin-top: 4px;">--</div>
+            </div>
+            <div style="background: rgba(11, 15, 25, 0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">RECOMMENDED COUNTERS</div>
+              <div id="outRecCounters" style="font-size: 1.4rem; font-weight: 700; color: #38bdf8; margin-top: 4px;">--</div>
+            </div>
+          </div>
+
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; font-size: 0.8rem; line-height: 1.6; color: var(--text-secondary);">
+            <strong style="color: #ffffff;">Theoretical Foundations:</strong><br>
+            • <strong>Little's Law</strong>: \( L_q = \lambda \cdot W_q \) and \( L = \lambda \cdot W \)<br>
+            • <strong>Traffic Intensity</strong>: \( \rho = \frac{\lambda}{c \mu} \). If \( \rho \ge 1.0 \), the queue is mathematically unstable and grows indefinitely.<br>
+            • <strong>Erlang-C Delay Probability</strong>: \( P_q = \frac{\frac{(c\rho)^c}{c!(1-\rho)}}{\sum_{k=0}^{c-1} \frac{(c\rho)^k}{k!} + \frac{(c\rho)^c}{c!(1-\rho)}} \)<br>
+            • <strong>Allen-Cunneen M/G/c Correction</strong>: \( W_q(M/G/c) \approx W_q(M/M/c) \cdot \frac{C_a^2 + C_s^2}{2} \)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Constrained Staff Optimizer -->
+    <div id="tab-optimizer" class="tab-view">
+      <div style="display: grid; grid-template-columns: 340px 1fr; gap: 24px;">
+        <div class="card">
+          <h3 class="card-title">💰 Staffing Constraints</h3>
+          <div class="form-group">
+            <label class="form-label" for="optHourlyWage">Staff Hourly Cost ($/hr)</label>
+            <input type="number" id="optHourlyWage" class="form-input" min="10" max="100" step="5" value="25">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="optMaxCounters">Max Simultaneous Desks Allowed</label>
+            <input type="number" id="optMaxCounters" class="form-input" min="3" max="10" step="1" value="6">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="optSlaTarget">Target Max Wait Time (min)</label>
+            <input type="number" id="optSlaTarget" class="form-input" min="2" max="20" step="1" value="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="optSlaGoal">Minimum SLA Compliance Target (%)</label>
+            <input type="number" id="optSlaGoal" class="form-input" min="70" max="99" step="5" value="90">
+          </div>
+          <button id="btnRunOptimizer" class="btn btn-primary" style="width: 100%;">
+            🔍 Solve Optimal Schedule
+          </button>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">💡 Optimization Results & Pareto Frontier</h3>
+          <div id="optRecommendationBox" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            Click "Solve Optimal Schedule" to compute optimal counter staffing policy.
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Allocation Policy</th>
+                  <th>Labor Hours</th>
+                  <th>Labor Cost</th>
+                  <th>Avg Wait</th>
+                  <th>Max Wait</th>
+                  <th>SLA Compliance (&lt;10m)</th>
+                </tr>
+              </thead>
+              <tbody id="optParetoBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>
+      <strong>SmartQ</strong> &bull; Applied Computing & Innovation Hackathon (BuildX 0.1 - Challenge 10: Intelligent Queue Prediction and Service Allocation)
+      <br>
+      Engineered with Discrete-Event Simulation, M/M/c &amp; M/G/c Queueing Theory, and Adaptive Staff Rebalancing.
+    </p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
