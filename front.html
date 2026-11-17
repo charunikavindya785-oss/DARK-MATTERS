@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QueuePulse</title>
+<meta name="description" content="Simulate customer arrivals, predict congestion and reallocate service counters before queues build up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="main.css">
+</head>
+<body>
+<div class="wrap">
+<header id="nav" class="top"><a class="brand" href="#home">QueuePulse</a><nav aria-label="Main"><a href="#home">Home</a><a href="#simulator">Simulator</a><a href="#scenarios">Scenarios</a><a href="#how-it-works">How it works</a></nav><button class="ghost" id="th" aria-label="Toggle light and dark theme">Light / dark</button></header>
+<main class="page" id="p-home">
+<section class="hero">
+ <div>
+  <h1>Next, please.</h1>
+  <p class="lead">Long queues are rarely a staffing problem alone. They are an allocation problem. QueuePulse predicts where congestion will form and shows how to move people and counters before it does.</p>
+  <div class="cta-band"><a class="btn" href="#simulator" data-preset="auto=1">Watch the live demo</a><a class="btn o" href="#scenarios">Try a real scenario</a></div>
+ </div>
+ <div class="tk" aria-hidden="true"><span>Now serving</span><b id="tk">A042</b></div>
+</section>
+<div class="track" aria-hidden="true"></div>
+
+<section class="sec split">
+ <div><p class="big">Why queues get long</p></div>
+ <div class="rules">
+  <div><h3>Demand is uneven</h3><p>Hospitals, universities and government offices see rushes at opening time, around deadlines and after lunch. A fixed rota cannot follow them.</p></div>
+  <div><h3>Counters are not equal</h3><p>Some staff are faster, some desks handle harder cases. Sending customers to counters in turn ignores that, so one queue crawls while another sits idle.</p></div>
+  <div><h3>Queue tokens only hide the problem</h3><p>An electronic number tells people where they stand. It does not shorten the wait. The fix is deciding who goes where, and when to open or move a counter.</p></div>
+ </div>
+</section>
+
+<section class="sec split">
+ <div><p class="big">What QueuePulse does</p></div>
+ <div class="rules">
+  <div><h3>Simulates the day</h3><p>Customers arrive at different times with different service needs, including priority cases, across three to eight counters. <a href="#simulator">Open the simulator</a>.</p></div>
+  <div><h3>Predicts congestion</h3><p>Recent queue growth is projected a few minutes ahead, so the warning arrives while there is still time to act. <a href="#how-it-works">See how the forecast works</a>.</p></div>
+  <div><h3>Recommends moves</h3><p>Overloaded counters are flagged with a specific fix, and applying it shows the effect straight away.</p></div>
+  <div><h3>Proves the improvement</h3><p>Baseline and smart allocation run side by side on identical customers, with average wait, longest wait, queue length and counter utilisation compared.</p></div>
+ </div>
+</section>
+
+<section class="sec">
+ <p class="big">Test it on your own kind of office</p>
+ <p class="lead">Start from a hospital outpatient desk, a university registrar on deadline day or a busy government counter, then change the numbers.</p>
+ <div class="cta-band"><a class="btn" href="#scenarios">Choose a scenario</a><a class="btn o" href="#how-it-works">Estimate counters needed</a></div>
+</section>
+</main>
+<main class="page" id="p-simulator" hidden>
+<h1 class="pt">Simulator <span class="chip" id="sn"></span></h1>
+<p class="lead">Run the baseline and the smart strategy on the same crowd. Trigger a surge, apply a recommendation, then export the results.</p>
+
+<section id="arena" class="mt">
+<div class="bar">
+ <label class="f">Counters <b id="ko">4</b><input id="k" type="range" min="3" max="8" value="4"></label>
+ <label class="f">Customers <b id="no">120</b><input id="n" type="range" min="100" max="300" step="20" value="120"></label>
+ <label class="f">Arrival pattern<select id="pat"><option value="normal">Steady</option><option value="peak" selected>Peak hour</option><option value="surge">Sudden surge</option></select></label>
+ <label class="f">Baseline strategy<select id="bm"><option value="rr">Round-robin (blind)</option><option value="jsq">Join shortest queue</option></select></label>
+ <label class="f">Speed <b id="so">4×</b><input id="sp" type="range" min="1" max="10" value="4"></label>
+ <div class="acts"><button class="btn" id="go">▶ Run simulation</button><button class="btn w" id="sg">⚡ Surge</button><button class="btn o" id="rs">Reset</button></div>
+</div>
+
+<div class="kpis">
+ <div class="kpi"><small>Average wait (smart)</small><b id="k-aw">0.0 min</b></div>
+ <div class="kpi"><small>Longest wait (smart)</small><b id="k-mw">0.0 min</b></div>
+ <div class="kpi"><small>Average queue length</small><b id="k-aq">0.0</b></div>
+ <div class="kpi"><small>Counter utilisation</small><b id="k-ut">0%</b></div>
+ <div class="kpi im"><small>Improvement over baseline</small><b id="k-im">0%</b></div>
+</div>
+
+<h2>Same customers, two strategies <span id="clk" class="chip">09:00</span></h2>
+<div class="arena">
+ <div class="pn"><div class="ph"><span id="ta">Baseline</span><span class="chip" id="ca">avg wait 0.0 min</span></div><canvas id="la" aria-label="Baseline counters and queues"></canvas></div>
+ <div class="pn"><div class="ph"><span>Smart allocation</span><span class="chip" id="cb">avg wait 0.0 min</span></div><canvas id="lb" aria-label="Smart allocation counters and queues"></canvas></div>
+</div>
+<div class="lg"><span><i style="background:var(--gd)"></i>Idle counter</span><span><i style="background:var(--ac)"></i>Serving</span><span><i style="background:var(--wn)"></i>Congested (4+ waiting)</span><span><i style="background:var(--bd)"></i>Critical (7+ waiting)</span><span><i style="background:var(--wn);outline:2px solid var(--tx)"></i>Priority customer</span></div>
+
+<div class="two">
+ <div>
+  <h2>Queue length and forecast</h2>
+  <div class="pn"><canvas id="ch" style="height:260px" aria-label="Queue length over time with forecast"></canvas>
+  <div class="lg"><span><i style="background:var(--bd)"></i>Baseline</span><span><i style="background:var(--gd)"></i>Smart</span><span><i style="background:var(--wn)"></i>Forecast (dashed)</span></div></div>
+ </div>
+ <div>
+  <h2>Baseline vs smart</h2>
+  <div class="pn" id="cmp"></div>
+ </div>
+</div>
+
+<div class="two">
+ <div>
+  <h2>Counter load heatmap</h2>
+  <div class="pn"><canvas id="hm" aria-label="Heatmap of counter busy time across the day"></canvas><div class="lg"><span>Darker cell = counter busy for more of that time slot (smart allocation)</span></div></div>
+ </div>
+ <div>
+  <h2>What to do now</h2>
+  <div class="pn" id="rec"></div>
+ </div>
+</div>
+
+<h2>Recently served <button class="btn o sm" id="ex">Export CSV</button></h2>
+<div class="pn scroll"><table id="tb"><thead><tr><th>Customer</th><th>Arrived</th><th>Waited</th><th>Counter</th><th>Type</th></tr></thead><tbody></tbody></table></div>
+</section>
+</main>
+<main class="page" id="p-scenarios" hidden>
+<h1 class="pt">Scenarios</h1>
+<p class="lead">Each one loads the simulator with settings that match a familiar pressure point. Everything can be changed once it is running.</p>
+
+<section class="mt">
+ <div class="sc">
+  <div><h3>Hospital outpatient desk</h3><p>Morning clinics open and patients arrive together. Urgent cases must not wait behind routine ones.</p></div>
+  <dl><dt>Counters</dt><dd>5</dd><dt>Customers</dt><dd>200</dd><dt>Pattern</dt><dd>Peak hour</dd><dt>Watch</dt><dd>Priority waits and the heatmap</dd></dl>
+  <a class="btn" href="#simulator" data-preset="k=5&n=200&pat=peak&bm=rr&auto=1&name=Hospital%20outpatient">Run it</a>
+ </div>
+ <div class="sc">
+  <div><h3>University registrar, deadline day</h3><p>Hundreds of students need the same office in the same few hours before a registration or fee deadline.</p></div>
+  <dl><dt>Counters</dt><dd>4</dd><dt>Customers</dt><dd>180</dd><dt>Pattern</dt><dd>Sudden surge</dd><dt>Watch</dt><dd>The forecast line, then press Surge</dd></dl>
+  <a class="btn" href="#simulator" data-preset="k=4&n=180&pat=surge&bm=jsq&auto=1&name=University%20registrar">Run it</a>
+ </div>
+ <div class="sc">
+  <div><h3>Government service office</h3><p>Steady demand through the day, counters of mixed speed, and a baseline that already tries to pick the shorter line.</p></div>
+  <dl><dt>Counters</dt><dd>6</dd><dt>Customers</dt><dd>260</dd><dt>Pattern</dt><dd>Steady</dd><dt>Watch</dt><dd>Utilisation and longest wait</dd></dl>
+  <a class="btn" href="#simulator" data-preset="k=6&n=260&pat=normal&bm=jsq&sp=6&auto=1&name=Government%20office">Run it</a>
+ </div>
+ <div class="sc">
+  <div><h3>Small branch, tight staffing</h3><p>The minimum of three counters under a peak. See how much smarter assignment recovers when no extra staff are available.</p></div>
+  <dl><dt>Counters</dt><dd>3</dd><dt>Customers</dt><dd>120</dd><dt>Pattern</dt><dd>Peak hour</dd><dt>Watch</dt><dd>Improvement over baseline</dd></dl>
+  <a class="btn" href="#simulator" data-preset="k=3&n=120&pat=peak&bm=rr&auto=1&name=Small%20branch">Run it</a>
+ </div>
+</section>
+</main>
+<main class="page" id="p-how-it-works" hidden>
+<h1 class="pt">How it works</h1>
+<p class="lead">A discrete-event simulation, two allocation strategies, a short-range forecast and a queueing-theory check.</p>
+
+<section class="sec split">
+ <div><p class="big">Two strategies, same crowd</p></div>
+ <div class="scroll"><table class="cmp">
+  <thead><tr><th></th><th>Baseline</th><th>Smart allocation</th></tr></thead>
+  <tbody>
+   <tr><td>New arrival goes to</td><td>Next counter in turn, or the shortest line</td><td>The counter with the earliest estimated finish time</td></tr>
+   <tr><td>Counter speed</td><td>Ignored</td><td>Included in the estimate</td></tr>
+   <tr><td>Priority customers</td><td>First come, first served</td><td>Move ahead of standard customers</td></tr>
+   <tr><td>Idle counter</td><td>Waits for its own line</td><td>Takes a customer from the longest line</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="sec split">
+ <div><p class="big">The forecast</p></div>
+ <div class="rules">
+  <div><h3>Fit the recent trend</h3><p>A linear regression runs over the last ten queue-length samples of the baseline, taken every half minute of simulated time.</p></div>
+  <div><h3>Project twelve minutes ahead</h3><p>The dashed amber line shows where the queue is heading. If it crosses the congestion zone, the recommendations panel warns how many minutes away that is.</p></div>
+  <div><h3>Act and compare</h3><p>Applying the overload recommendation rebalances the baseline queues, and the improvement figure shows how much of the gap that closes.</p></div>
+ </div>
+</section>
+
+<section class="sec">
+ <h2>How many counters do you need?</h2>
+ <p class="lead">An Erlang C estimate for steady demand. Enter your own numbers, no simulation needed.</p>
+ <div class="calc">
+  <div class="pn">
+   <label class="f">Customers arriving per hour<input type="number" id="lam" min="1" value="60"></label><br>
+   <label class="f">Average service time (minutes)<input type="number" id="svc" min="0.5" step="0.5" value="4"></label><br>
+   <label class="f">Counters open<input type="number" id="cc" min="1" max="30" value="5"></label><br>
+   <label class="f">Target average wait (minutes)<input type="number" id="tw" min="0.5" step="0.5" value="3"></label>
+  </div>
+  <div class="pn">
+   <div class="outs">
+    <div class="out" id="o1">-<small>Counter utilisation</small></div>
+    <div class="out" id="o2">-<small>Chance a customer waits</small></div>
+    <div class="out" id="o3">-<small>Average wait</small></div>
+    <div class="out" id="o4">-<small>Counters needed for your target</small></div>
+   </div>
+   <div class="note" id="msg"></div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:18px">Assumes random arrivals and equal counters. The simulator relaxes both, which is why it can find gains this formula cannot.</p>
+</section>
+</main>
+<footer>QueuePulse: queue prediction and service allocation for hospitals, universities and government offices.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script src="main.js"></script>
+</body>
+</html>
